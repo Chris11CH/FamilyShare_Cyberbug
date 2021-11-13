@@ -35,7 +35,7 @@ if (process.env.CITYLAB !== 'ALL') {
     next()
   })
 }
-
+// test
 // Callback that checks if you have a valid token or not, if yes sets the user_id and email, otherwise sets nothing and you are not authenticated
 app.use(async (req) => {
   try {
