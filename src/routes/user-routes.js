@@ -5,11 +5,11 @@ const objectid = require('objectid')
 const multer = require('multer')
 const jwt = require('jsonwebtoken')
 const fr = require('find-remove')
-const nodemailer = require('nodemailer')
+// const nodemailer = require('nodemailer')
 const path = require('path')
 const nh = require('../helper-functions/notification-helpers')
 // const uh = require('../helper-functions/user-helpers')
-const hf = require('../helper-functions/forgot-password-email')
+// const hf = require('../helper-functions/forgot-password-email')
 // const rl = require('../helper-functions/request-link-email')
 // const wt = require('../helper-functions/walthrough-email')
 // const texts = require('../constants/notification-texts')
@@ -28,6 +28,7 @@ const calendar = google.calendar({
 
 const sharp = require('sharp')
 
+/*
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -38,6 +39,7 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized: false
   }
 })
+*/
 
 const profileStorage = multer.diskStorage({
   destination(req, file, cb) {
@@ -74,11 +76,21 @@ const Parent = require('../models/parent')
 const Child = require('../models/child')
 // const Announcement = require('../models/announcement')
 // const Framily = require('../models/framily')
-const Password_Reset = require('../models/password-reset')
+// const Password_Reset = require('../models/password-reset')
 const Device = require('../models/device')
 const Rating = require('../models/rating')
 const Community = require('../models/community')
 
+// Endpoint to register a new user
+// Params body:
+// given_name
+// family_name
+// number
+// email
+// password
+// visible
+// language
+// deviceToken
 router.post('/', async (req, res, next) => {
   const {
     given_name, family_name, number, email, password, visible, language, deviceToken
@@ -165,6 +177,13 @@ router.post('/', async (req, res, next) => {
   }
 })
 
+// Login endpoint
+// Params body:
+// email
+// password
+// deviceToken
+// language
+// origin
 router.post('/authenticate/email', async (req, res, next) => {
   const {
     email, password, deviceToken, language, origin
@@ -227,6 +246,9 @@ router.post('/authenticate/email', async (req, res, next) => {
   }
 })
 
+// Token updater endpoint
+// Params body:
+// deviceToken
 router.post('/:id/deviceToken', async (req, res, next) => {
   try {
     const { id: user_id } = req.params
@@ -245,91 +267,8 @@ router.post('/:id/deviceToken', async (req, res, next) => {
   }
 })
 
-router.get('/changepasswordredirect/:token', (req, res) => {
-  res.redirect(`families-share://changepsw/${req.params.token}`)
-})
-
-router.post('/forgotpassword', async (req, res, next) => {
-  const { email, origin } = req.body
-  try {
-    const user = await User.findOne({ email })
-    if (!user) {
-      return res.status(404).send("User doesn't exist")
-    }
-    const token = await jwt.sign({ user_id: user.user_id, email }, process.env.SERVER_SECRET, { expiresIn: 60 * 60 * 24 })
-    const mailOptions = {
-      from: process.env.SERVER_MAIL,
-      to: email,
-      subject: 'Forgot Password',
-      html: hf.newForgotPasswordEmail(token, origin)
-    }
-    const reset = await Password_Reset.findOne({ user_id: user.user_id, email })
-    if (reset) {
-      reset.token = token
-      await reset.save()
-    } else {
-      await Password_Reset.create({
-        user_id: user.user_id,
-        email: user.email,
-        token
-      })
-    }
-    await transporter.sendMail(mailOptions)
-    res.status(200).send('Forgot password email was sent')
-  } catch (error) {
-    next(error)
-  }
-})
-
-router.get('/changepassword', (req, res, next) => {
-  if (!req.user_id) { return res.status(401).send('Invalid token') }
-  const { user_id } = req
-  Password_Reset.findOne({ token: req.headers.authorization }).then(reset => {
-    if (!reset) {
-      return res.status(404).send('Bad Request')
-    }
-    return Profile.findOne({ user_id }).populate('image')
-      .lean()
-      .exec()
-      .then(profile => {
-        res.json(profile)
-      })
-  }).catch(next)
-})
-
-router.post('/changepassword', async (req, res, next) => {
-  if (!req.user_id) { return res.status(401).send('Not authorized') }
-  try {
-    const { user_id, email } = req
-    const reset = await Password_Reset.findOneAndDelete({ user_id })
-    if (!reset) {
-      return res.status(404).send('Reset not found')
-    }
-    const profile = await Profile.findOne({ user_id }).populate('image').exec()
-    if (profile.suspended) {
-      await Profile.updateOne({ user_id }, { suspended: false })
-      const usersChildren = await Parent.find({ parent_id: user_id })
-      const childIds = usersChildren.map(usersChildren.child_id)
-      await Child.updateMany({ child_id: { $in: childIds } }, { suspended: false })
-    }
-    const user = await User.findOne({ user_id })
-    const token = await jwt.sign({ user_id, email }, process.env.SERVER_SECRET)
-    const response = {
-      id: user_id,
-      email,
-      name: `${profile.given_name} ${profile.family_name}`,
-      image: profile.image.path,
-      token
-    }
-    user.last_login = new Date()
-    user.password = req.body.password
-    await user.save()
-    res.json(response)
-  } catch (error) {
-    next(error)
-  }
-})
-
+// Enpoint to get your user
+// Params: just the id on the request
 router.get('/:id', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const { id } = req.params
@@ -341,6 +280,9 @@ router.get('/:id', (req, res, next) => {
   }).catch(next)
 })
 
+// Endpoint to get the list of the groups you joined in
+// If the user has not joined any returns 404
+// Params: just the id on the request
 router.get('/:id/groups', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const { user_id } = req
@@ -352,6 +294,8 @@ router.get('/:id/groups', (req, res, next) => {
   }).catch(next)
 })
 
+// Enpoint to join a group
+// Params body: group_id
 router.post('/:id/groups', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const { user_id } = req
@@ -372,6 +316,7 @@ router.post('/:id/groups', (req, res, next) => {
   }).catch(next)
 })
 
+// ?
 router.patch('/:userId/groups/:groupId', async (req, res, next) => {
   if (req.user_id !== req.params.userId) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.groupId
@@ -389,6 +334,8 @@ router.patch('/:userId/groups/:groupId', async (req, res, next) => {
   }
 })
 
+// Endpoint to exit a group
+// Params: userId and groupId on the request
 router.delete('/:userId/groups/:groupId', async (req, res, next) => {
   if (req.user_id !== req.params.userId) { return res.status(401).send('Unauthorized') }
   try {
@@ -423,6 +370,8 @@ router.delete('/:userId/groups/:groupId', async (req, res, next) => {
   }
 })
 
+// Endpoint to get the profile of a user
+// Params: id of the user on the request
 router.get('/:id/profile', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const user_id = req.params.id
@@ -439,6 +388,8 @@ router.get('/:id/profile', (req, res, next) => {
     }).catch(next)
 })
 
+// Endpoint to update the profile
+// Params body: given_name, family_name, email, phone, phone_type, visible, street, number, city, description, contact_option
 router.patch('/:id/profile', profileUpload.single('photo'), async (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const user_id = req.params.id

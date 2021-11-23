@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const path = require('path')
-const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
 const chalk = require('chalk')
@@ -35,7 +34,7 @@ if (process.env.CITYLAB !== 'ALL') {
     next()
   })
 }
-// test
+
 // Callback that checks if you have a valid token or not, if yes sets the user_id and email, otherwise sets nothing and you are not authenticated
 app.use(async (req) => {
   try {
@@ -53,8 +52,8 @@ app.use(async (req) => {
 })
 app.use(compression())
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use('/images', express.static(path.join(__dirname, '../images')))
 
 // if (config.util.getEnv('NODE_ENV') === 'development') {
@@ -76,7 +75,7 @@ if (config.util.getEnv('NODE_ENV') === 'production') {
   })
 }
 
-// app.all('*', (req, res) => res.status(404).send('Invalid endpoint'))
+app.all('*', (req, res) => res.status(404).send('Invalid endpoint'))
 
 app.use((err, req, res, next) => {
   console.error(err.stack)

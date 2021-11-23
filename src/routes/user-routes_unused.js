@@ -1,4 +1,97 @@
 /*
+// It uses the client URI
+router.get('/changepasswordredirect/:token', (req, res) => {
+  res.redirect(`families-share://changepsw/${req.params.token}`)
+})
+*/
+
+/*
+// It uses the client URI
+router.post('/forgotpassword', async (req, res, next) => {
+  const { email, origin } = req.body
+  try {
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(404).send("User doesn't exist")
+    }
+    const token = await jwt.sign({ user_id: user.user_id, email }, process.env.SERVER_SECRET, { expiresIn: 60 * 60 * 24 })
+    const mailOptions = {
+      from: process.env.SERVER_MAIL,
+      to: email,
+      subject: 'Forgot Password',
+      html: hf.newForgotPasswordEmail(token, origin)
+    }
+    const reset = await Password_Reset.findOne({ user_id: user.user_id, email })
+    if (reset) {
+      reset.token = token
+      await reset.save()
+    } else {
+      await Password_Reset.create({
+        user_id: user.user_id,
+        email: user.email,
+        token
+      })
+    }
+    await transporter.sendMail(mailOptions)
+    res.status(200).send('Forgot password email was sent')
+  } catch (error) {
+    next(error)
+  }
+})
+*/
+
+// Don't know how it works
+/*
+router.get('/changepassword', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Invalid token') }
+  const { user_id } = req
+  Password_Reset.findOne({ token: req.headers.authorization }).then(reset => {
+    if (!reset) {
+      return res.status(404).send('Bad Request')
+    }
+    return Profile.findOne({ user_id }).populate('image')
+      .lean()
+      .exec()
+      .then(profile => {
+        res.json(profile)
+      })
+  }).catch(next)
+})
+
+router.post('/changepassword', async (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Not authorized') }
+  try {
+    const { user_id, email } = req
+    const reset = await Password_Reset.findOneAndDelete({ user_id })
+    if (!reset) {
+      return res.status(404).send('Reset not found')
+    }
+    const profile = await Profile.findOne({ user_id }).populate('image').exec()
+    if (profile.suspended) {
+      await Profile.updateOne({ user_id }, { suspended: false })
+      const usersChildren = await Parent.find({ parent_id: user_id })
+      const childIds = usersChildren.map(usersChildren.child_id)
+      await Child.updateMany({ child_id: { $in: childIds } }, { suspended: false })
+    }
+    const user = await User.findOne({ user_id })
+    const token = await jwt.sign({ user_id, email }, process.env.SERVER_SECRET)
+    const response = {
+      id: user_id,
+      email,
+      name: `${profile.given_name} ${profile.family_name}`,
+      image: profile.image.path,
+      token
+    }
+    user.last_login = new Date()
+    user.password = req.body.password
+    await user.save()
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+*/
+/*
 router.post('/authenticate/google', async (req, res, next) => {
   const { deviceToken, language, origin, response } = req.body
   const { user: googleProfile, idToken: googleToken } = response
