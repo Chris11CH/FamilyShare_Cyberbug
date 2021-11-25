@@ -103,6 +103,8 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 
+// Endpoint used to search for groups
+// Params: searchBy (visibility, ids, all), ids
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
   const { query } = req
@@ -133,7 +135,7 @@ router.get('/', (req, res, next) => {
       break
     case 'ids':
       const groupIds = req.query.ids
-      Group.find({ group_id: { $in: groupIds } })
+      Group.find({ _id: { $in: groupIds } })
         .populate('image')
         .lean()
         .exec()
@@ -147,7 +149,6 @@ router.get('/', (req, res, next) => {
       break
     case 'all':
       Group.find({})
-        .select('name')
         .then(groups => {
           if (groups.length === 0) {
             return res.status(404).send('No groups were found')
@@ -161,12 +162,13 @@ router.get('/', (req, res, next) => {
   }
 })
 
+// Endpoint to create a new group
+// Params: invite_ids (array) , description, location, name, visible, owner_id, contact_type (none, email, phone), contact_info
 router.post('/', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
   const {
-    invite_ids,
     description,
     location,
     name,
@@ -177,7 +179,6 @@ router.post('/', async (req, res, next) => {
   } = req.body
   if (
     !(
-      invite_ids &&
       description &&
       location &&
       name &&
@@ -188,6 +189,7 @@ router.post('/', async (req, res, next) => {
   ) {
     return res.sendStatus(400)
   }
+  
   const group_id = objectid()
   const image_id = objectid()
   const settings_id = objectid()
@@ -232,6 +234,7 @@ router.post('/', async (req, res, next) => {
       user_accepted: true
     }
   ]
+  /*
   invite_ids.forEach(invite_id => {
     members.push({
       group_id,
@@ -241,6 +244,7 @@ router.post('/', async (req, res, next) => {
       user_accepted: false
     })
   })
+  */
   try {
     const response = await calendar.calendars.insert({ resource: newCal })
     group.calendar_id = response.data.id
@@ -254,31 +258,11 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.get('/suggestions', (req, res, next) => {
-  Group_Settings.find({ visible: true })
-    .then(groups => {
-      if (groups.length === 0) {
-        return res.status(404).send('No suggestions were found')
-      }
-      const noOfSuggestions = groups.length > 2 ? 3 : groups.length
-      const suggestions = []
-      for (let i = groups.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        const temp = groups[i]
-        groups[i] = groups[j]
-        groups[j] = temp
-      }
-      for (let i = 0; i < noOfSuggestions; i++) {
-        suggestions.push(groups[i].group_id)
-      }
-      res.json(suggestions)
-    })
-    .catch(next)
-})
-
+// Endpoint to get the group info
+// Params: id of the group
 router.get('/:id', (req, res, next) => {
   const { id } = req.params
-  Group.findOne({ group_id: id })
+  Group.findOne({ _id: id })
     .populate('image')
     .lean()
     .exec()

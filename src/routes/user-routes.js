@@ -81,6 +81,7 @@ const Device = require('../models/device')
 const Rating = require('../models/rating')
 const Community = require('../models/community')
 
+// Wrapper DONE
 // Endpoint to register a new user
 // Params body:
 // given_name
@@ -177,6 +178,7 @@ router.post('/', async (req, res, next) => {
   }
 })
 
+// Wrapper DONE
 // Login endpoint
 // Params body:
 // email
@@ -267,6 +269,7 @@ router.post('/:id/deviceToken', async (req, res, next) => {
   }
 })
 
+// Wrapper DONE
 // Enpoint to get your user
 // Params: just the id on the request
 router.get('/:id', (req, res, next) => {
@@ -280,6 +283,7 @@ router.get('/:id', (req, res, next) => {
   }).catch(next)
 })
 
+// Wrapper DONE
 // Endpoint to get the list of the groups you joined in
 // If the user has not joined any returns 404
 // Params: just the id on the request
@@ -294,6 +298,7 @@ router.get('/:id/groups', (req, res, next) => {
   }).catch(next)
 })
 
+// Wrapper DONE
 // Enpoint to join a group
 // Params body: group_id
 router.post('/:id/groups', (req, res, next) => {
@@ -370,6 +375,7 @@ router.delete('/:userId/groups/:groupId', async (req, res, next) => {
   }
 })
 
+// Wrapper DONE
 // Endpoint to get the profile of a user
 // Params: id of the user on the request
 router.get('/:id/profile', (req, res, next) => {
