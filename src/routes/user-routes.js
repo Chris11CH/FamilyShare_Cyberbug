@@ -339,6 +339,7 @@ router.patch('/:userId/groups/:groupId', async (req, res, next) => {
   }
 })
 
+// Wrapper DONE
 // Endpoint to exit a group
 // Params: userId and groupId on the request
 router.delete('/:userId/groups/:groupId', async (req, res, next) => {
@@ -394,6 +395,7 @@ router.get('/:id/profile', (req, res, next) => {
     }).catch(next)
 })
 
+// Wrapper DONE
 // Endpoint to update the profile
 // Params body: given_name, family_name, email, phone, phone_type, visible, street, number, city, description, contact_option
 router.patch('/:id/profile', profileUpload.single('photo'), async (req, res, next) => {
