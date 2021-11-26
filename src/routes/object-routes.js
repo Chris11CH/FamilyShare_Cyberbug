@@ -5,6 +5,9 @@ const router = new express.Router()
 const Object = require('../models/object')
 
 //Endpoint to register a new object
+//Params body:
+//object_name
+//object_description
 router.post('/:id', async (req, res, next) => {
     const {
         object_name, object_description
@@ -47,6 +50,8 @@ router.post('/:id', async (req, res, next) => {
 })
 
 //Endpoint to get your objects
+//Params body:
+//user_id
 router.get('/:id/objects', (req, res, next) => {
     if( req.user_id !== req.params.id){ return res.status(401).send('Unauthorized') }
     const { id } = req.params
@@ -58,6 +63,8 @@ router.get('/:id/objects', (req, res, next) => {
 })
 
 //Endpoint to get object info
+//Params body:
+//user_id
 router.get('/:id/info', (req, res, next) =>{
     if(!req.user_id) { return res.status(401).send('Unauthorized') }
     const obj_id = req.params.id
@@ -73,6 +80,8 @@ router.get('/:id/info', (req, res, next) =>{
 })
 
 //Endpoint to remove an object
+//Params body
+//user_id
 router.get('/:id/remove', (req, res, next) =>{
     if(!req.user_id) { return res.status(401).send('Unauthorized') }
     const obj_id = req.params.id
@@ -83,10 +92,9 @@ router.get('/:id/remove', (req, res, next) =>{
 })
 
 
-//router.post()
 /*
     - ricerca oggetto    (uguale ad info??)                                   /:groupId/search
-    - rimozione oggetto                                     /:userId/:objId/remove
-    - visualizza oggetti condivisi                          /:userId/:groupId/shared
-    - condividi oggetto con gruppo                          /:userId/:groupId/:objId/shareObj   
+    - rimozione oggetto    params body: user_id                                 /:userId/:objId/remove
+    - visualizza oggetti condivisi     params body: user_id, group_id                     /:userId/:groupId/shared
+    - condividi oggetto con gruppo    params body: user_id,group_id                      /:userId/:groupId/:objId/shareObj   
 */
