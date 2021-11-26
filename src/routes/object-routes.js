@@ -47,6 +47,7 @@ router.post('/:id', async (req, res, next) => {
   }
 })
 
+<<<<<<< HEAD
 // Endpoint to get your objects
 router.get('/:id', (req, res, next) => {
   if ( req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
@@ -56,10 +57,46 @@ router.get('/:id', (req, res, next) => {
       return res.status(404).send("No objects for this user")  
     res.json(objects)
   }).catch(next)
+=======
+//Endpoint to get your objects
+router.get('/:id/objects', (req, res, next) => {
+    if( req.user_id !== req.params.id){ return res.status(401).send('Unauthorized') }
+    const { id } = req.params
+    Object.find({ owner_id: id}).then(objects => {
+        if(!objects)
+            return res.status(404).send("No objects for this user")  
+        res.json(objects)
+    }).catch(next)
+>>>>>>> 3197a7524479d1fde6de35eb5d74781946ba79f3
+})
+
+//Endpoint to get object info
+router.get('/:id/info', (req, res, next) =>{
+    if(!req.user_id) { return res.status(401).send('Unauthorized') }
+    const obj_id = req.params.id
+    Object.findOne({ obj_id })
+        .populate('image')
+        .lean()
+        .exec()
+        .then(obj => {
+            if(!obj)
+                return res.status(404).send('Object not found') 
+            res.json(obj)
+        }).catch(next)
+})
+
+//Endpoint to remove an object
+router.get('/:id/remove', (req, res, next) =>{
+    if(!req.user_id) { return res.status(401).send('Unauthorized') }
+    const obj_id = req.params.id
+    Object.remove(obj_id).then( obj => {
+        if(!obj)
+                return res.status(404).send('Object not found') 
+        }).catch(next)
 })
 
 
-
+<<<<<<< HEAD
 // router.post()
 /*  - lista oggetti lista privata                           /:userId
     - ricerca oggetto                                       /:groupId/search
@@ -67,4 +104,12 @@ router.get('/:id', (req, res, next) => {
     - visualizza oggetti condivisi                          /:userId/:groupId/shared
     - condividi oggetto con gruppo                          /:userId/:groupId/:objId/shareObj
     - info oggetto                                          /:objId/info
+=======
+//router.post()
+/*
+    - ricerca oggetto    (uguale ad info??)                                   /:groupId/search
+    - rimozione oggetto                                     /:userId/:objId/remove
+    - visualizza oggetti condivisi                          /:userId/:groupId/shared
+    - condividi oggetto con gruppo                          /:userId/:groupId/:objId/shareObj   
+>>>>>>> 3197a7524479d1fde6de35eb5d74781946ba79f3
 */
