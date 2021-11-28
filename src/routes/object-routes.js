@@ -5,6 +5,7 @@ const router = new express.Router()
 const Object = require('../models/object')
 const Image = require('../models/image')
 
+// Wrapper DONE
 // Endpoint to register a new object
 // Params body:
 // object_name
@@ -47,6 +48,7 @@ router.post('/:id', async (req, res, next) => {
   }
 })
 
+// Wrapper DONE
 // Endpoint to get your objects
 // Params body:
 // user_id
