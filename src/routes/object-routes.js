@@ -10,7 +10,8 @@ const Image = require('../models/image')
 // Params body:
 // object_name
 // object_description
-router.post('/:id', async (req, res, next) => {
+router.post('/:user_id', async (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const {
     object_name, object_description
   } = req.body
@@ -30,7 +31,7 @@ router.post('/:id', async (req, res, next) => {
     const image = {
       image_id,
       owner_type: 'user',
-      owner_id: req.params,
+      owner_id: req.params.user_id,
       path: '/images/profiles/object_default_photo.png',
       thumbnail_path: '/images/profiles/object_default_photo.png'
     }
@@ -52,9 +53,9 @@ router.post('/:id', async (req, res, next) => {
 // Endpoint to get your objects
 // Params body:
 // user_id
-router.get('/:id/objects', (req, res, next) => {
+router.post('/:user_id/objects', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
-  const { id } = req.params
+  const { id } = req.params.user_id
   Object.find({ owner_id: id }).then(objects => {
     if (!objects) {
       return res.status(404).send('No objects for this user')
@@ -67,9 +68,9 @@ router.get('/:id/objects', (req, res, next) => {
 // Params body:
 // user_id
 // group_id
-router.get('/:id/search', (req, res, next) => {
+router.post('/:obj_id/search', (req, res, next) => {
   if (!req.user_id || !req.group_id) { return res.status(401).send('Unauthorized') }
-  const obj_id = req.params.id
+  const obj_id = req.params.obj_id
   Object.findOne({ obj_id })
     .populate('image')
     .lean()
@@ -85,9 +86,9 @@ router.get('/:id/search', (req, res, next) => {
 // Endpoint to remove an object
 // Params body
 // user_id
-router.get('/:id/remove', (req, res, next) => {
+router.post('/:obj_id/remove', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
-  const obj_id = req.params.id
+  const obj_id = req.params.obj_id
   Object.remove(obj_id).then(obj => {
     if (!obj) {
       return res.status(404).send('Object not found')
@@ -98,7 +99,7 @@ router.get('/:id/remove', (req, res, next) => {
 // Endpoint to show shared objects of the group
 // Params body:
 // user_id
-router.get('/:group_id/sharedObjs', (req, res, next) => {
+router.post('/:group_id/sharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   // const group_id = req.params.group_id
 })
