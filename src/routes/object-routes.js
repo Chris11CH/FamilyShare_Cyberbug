@@ -89,7 +89,7 @@ router.post('/:obj_id/search', (req, res, next) => {
 router.post('/:obj_id/remove', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.remove(obj_id).then(obj => {
+  Object.remove({ obj_id }).then(obj => {
     if (!obj) {
       return res.status(404).send('Object not found')
     }
@@ -101,13 +101,49 @@ router.post('/:obj_id/remove', (req, res, next) => {
 // user_id
 router.post('/:group_id/sharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
-  // const group_id = req.params.group_id
+  const group_id = req.params.group_id
+  Object.find({ shared_with_group: group_id })
+    .then(objects => {
+      if (!objects) {
+        return res.status(404).send('No shared objects for this group')
+      }
+      res.json(objects)
+    }).catch(next)
 })
 
-// Endpoint to share an object in the group
+// Endpoint to share an object with the group
 // Params body:
 // user_id
 // group_id
-router.post('/group/:id/shareObj', (req, res, next) => {
-  // da vedere
+router.post('/group/:obj_id/shareObj', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ obj_id })
+    .then(obj => {
+      if (!obj) {
+        return res.status(404).send('Object not found')
+      }
+      obj.shared_with_group = req.body.group_id
+    }).catch(next)
+})
+
+// Endpoint to send share request
+// Params body:
+// user_id
+router.post('/:obj_id/share', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+})
+
+// Endpoint to accept share request
+// Params body:
+// user_id
+router.post('/:obj_id/share/accept', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+})
+
+// Endpoint to notify object return
+// Params body:
+// user_id
+router.post('/:obj_id/share/return', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
 })

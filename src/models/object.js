@@ -22,6 +22,14 @@ const objectSchema = new mongoose.Schema(
     owner: {
       type: String,
       required: true
+    },
+    shared_with_group: {
+      type: String,
+      required: false
+    },
+    shared_with_user: {
+      type: String,
+      required: false
     }
   },
   { timestamps: true, toJSON: { virtuals: true } }
