@@ -83,7 +83,7 @@ router.post('/:obj_id/search', (req, res, next) => {
     }).catch(next)
 })
 
-// Endpoint to remove an object
+// Endpoint to remove an object from the system
 // Params body
 // user_id
 router.post('/:obj_id/remove', (req, res, next) => {
@@ -102,13 +102,32 @@ router.post('/:obj_id/remove', (req, res, next) => {
 router.post('/:group_id/sharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
-  Object.find({ shared_with_group: group_id })
+  Object.find({ group_ids: group_id })
     .then(objects => {
       if (!objects) {
         return res.status(404).send('No shared objects for this group')
       }
       res.json(objects)
     }).catch(next)
+})
+
+// Endpoint to remove an object from a group
+// Params body
+// user_id
+// group_id
+router.post('/:obj_id/remove', (req, res, next) => {
+  if (!req.user_id || !req.group_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ obj_id }).then(obj => {
+    if (!obj) {
+      return res.status(404).send('Object not found')
+    }
+    const index = obj.group_ids.indexOf(req.group_id)
+    if (!index) {
+      return res.status(404).send('Object not shared in this group')
+    }
+    obj.group_ids.pull(index, 1)
+  }).catch(next)
 })
 
 // Endpoint to share an object with the group
@@ -123,7 +142,7 @@ router.post('/group/:obj_id/shareObj', (req, res, next) => {
       if (!obj) {
         return res.status(404).send('Object not found')
       }
-      obj.shared_with_group = req.body.group_id
+      obj.group_ids.push(req.body.group_id)
     }).catch(next)
 })
 
@@ -132,6 +151,17 @@ router.post('/group/:obj_id/shareObj', (req, res, next) => {
 // user_id
 router.post('/:obj_id/share', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ obj_id })
+    .then(obj => {
+      if (!obj) {
+        return res.status(404).send('Object not found')
+      }
+      if (obj.shared_with_user) {
+        return res.status(404).send('Object not available')
+      }
+      res.json(obj)
+    }).catch(next)
 })
 
 // Endpoint to accept share request
@@ -139,6 +169,15 @@ router.post('/:obj_id/share', (req, res, next) => {
 // user_id
 router.post('/:obj_id/share/accept', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ obj_id })
+    .then(obj => {
+      if (!obj) {
+        return res.status(404).send('Object not found')
+      }
+      obj.shared_with_user = req.body.user_id
+      res.json(obj)
+    }).catch(next)
 })
 
 // Endpoint to notify object return
@@ -146,4 +185,16 @@ router.post('/:obj_id/share/accept', (req, res, next) => {
 // user_id
 router.post('/:obj_id/share/return', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ obj_id })
+    .then(obj => {
+      if (!obj) {
+        return res.status(404).send('Object not found')
+      }
+      if (!obj.shared_with_user) {
+        return res.status(404).send('Object is not shared')
+      }
+      obj.shared_with_user = null
+      res.json(obj)
+    }).catch(next)
 })

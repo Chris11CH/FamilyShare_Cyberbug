@@ -23,12 +23,14 @@ const objectSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    shared_with_group: {
-      type: String,
+    group_ids: {
+      type: [String],
+      default: null,
       required: false
     },
     shared_with_user: {
       type: String,
+      default: null,
       required: false
     }
   },
