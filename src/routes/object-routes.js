@@ -126,6 +126,21 @@ router.post('/:group_id/sharedObjs', (req, res, next) => {
     }).catch(next)
 })
 
+// Endpoint to show user's shared objects with the group
+// Params body:
+// user_id
+router.post('/:group_id/mySharedObjs', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const group_id = req.params.group_id
+  Object.find({ group_ids: group_id } && { owner_id: req.user_id })
+    .then(objects => {
+      if (!objects) {
+        return res.status(404).send('You have no shared objects with this group')
+      }
+      res.json(objects)
+    }).catch(next)
+})
+
 // Endpoint to remove an object from a group
 // Params body
 // user_id
