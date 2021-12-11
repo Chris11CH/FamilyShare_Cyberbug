@@ -26,7 +26,7 @@ router.post('/:user_id', async (req, res, next) => {
       object_name,
       image_id,
       object_description,
-      owner_id: req.params
+      owner: req.params.user_id
     }
     const image = {
       image_id,
@@ -54,9 +54,9 @@ router.post('/:user_id', async (req, res, next) => {
 // Params body:
 // user_id
 router.post('/:user_id/lentObjects', (req, res, next) => {
-  if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
+  if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
   const { id } = req.params.user_id
-  Object.find({ owner_id: id }).then(objects => {
+  Object.find({ owner: id }).then(objects => {
     if (!objects) {
       return res.status(404).send('No objects for this user')
     }
@@ -132,7 +132,7 @@ router.post('/:group_id/sharedObjs', (req, res, next) => {
 router.post('/:group_id/mySharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
-  Object.find({ group_ids: group_id } && { owner_id: req.user_id })
+  Object.find({ group_ids: group_id } && { owner: req.user_id })
     .then(objects => {
       if (!objects) {
         return res.status(404).send('You have no shared objects with this group')
