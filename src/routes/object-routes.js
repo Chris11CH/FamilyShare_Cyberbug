@@ -228,3 +228,5 @@ router.post('/:obj_id/share/return', (req, res, next) => {
       res.json(obj)
     }).catch(next)
 })
+
+module.exports = router
