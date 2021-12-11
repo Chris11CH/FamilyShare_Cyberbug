@@ -267,7 +267,7 @@ router.post('/', async (req, res, next) => {
 // Params: id of the group
 router.get('/:id', (req, res, next) => {
   const { id } = req.params
-  Group.findOne({ _id: id })
+  Group.findOne({ group_id: id })
     .populate('image')
     .lean()
     .exec()
