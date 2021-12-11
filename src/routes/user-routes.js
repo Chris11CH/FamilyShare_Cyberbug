@@ -347,6 +347,7 @@ router.delete('/:userId/groups/:groupId', async (req, res, next) => {
   try {
     const user_id = req.params.userId
     const group_id = req.params.groupId
+    /*
     const children = await Parent.find({ parent_id: user_id })
     const usersChildrenIds = children.map(child => child.child_id)
     const group = await Group.findOne({ group_id })
@@ -369,6 +370,7 @@ router.delete('/:userId/groups/:groupId', async (req, res, next) => {
       }
       calendar.events.patch({ calendarId: group.calendar_id, eventId: event.id, resource: timeslotPatch })
     }))
+    */
     await Member.deleteOne({ user_id, group_id })
     res.status(200).send('User left group')
   } catch (error) {
