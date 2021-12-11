@@ -50,10 +50,10 @@ router.post('/:user_id', async (req, res, next) => {
 })
 
 // Wrapper DONE
-// Endpoint to get your objects
+// Endpoint to get your lent objects
 // Params body:
 // user_id
-router.post('/:user_id/objects', (req, res, next) => {
+router.post('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const { id } = req.params.user_id
   Object.find({ owner_id: id }).then(objects => {
@@ -64,7 +64,22 @@ router.post('/:user_id/objects', (req, res, next) => {
   }).catch(next)
 })
 
-// Endpoint to search an onject
+// Wrapped DONE
+// Endpoint to get your borrowed objects
+// Params body:
+// user_id
+router.post('/:user_id/borrowedObjects', (req, res, next) => {
+  if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
+  const { id } = req.params.user_id
+  Object.find({ shared_with_user: id }).then(objects => {
+    if (!objects) {
+      return res.status(404).send('No objects for this user')
+    }
+    res.json(objects)
+  }).catch(next)
+})
+
+// Endpoint to search an object
 // Params body:
 // user_id
 // group_id
