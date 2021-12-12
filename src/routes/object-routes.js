@@ -11,10 +11,9 @@ const Image = require('../models/image')
 // object_name
 // object_description
 router.post('/:user_id', async (req, res, next) => {
-  if (!req.params.user_id) { return res.status(401).send('Unauthorized') }
-  const {
-    object_name, object_description
-  } = req.body
+  if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
+  const object_name = req.body.object_name
+  const object_description = req.body.object_description
   if (!(object_name && object_description)) {
     return res.status(400).send('Bad Request')
   }
