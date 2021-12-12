@@ -53,7 +53,7 @@ router.post('/:user_id', async (req, res, next) => {
 // Endpoint to get your lent objects
 // Params body:
 // user_id
-router.post('/:user_id/lentObjects', (req, res, next) => {
+router.get('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
   Object.find({ owner: req.params.user_id })
     .then(objects => {
@@ -68,7 +68,7 @@ router.post('/:user_id/lentObjects', (req, res, next) => {
 // Endpoint to get your borrowed objects
 // Params body:
 // user_id
-router.post('/:user_id/borrowedObjects', (req, res, next) => {
+router.get('/:user_id/borrowedObjects', (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const { id } = req.params.user_id
   Object.find({ shared_with_user: id }).then(objects => {
@@ -101,7 +101,7 @@ router.post('/:obj_id/search', (req, res, next) => {
 // Endpoint to remove an object from the system
 // Params body
 // user_id
-router.post('/:obj_id/remove', (req, res, next) => {
+router.get('/:obj_id/remove', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
   Object.remove({ obj_id }).then(obj => {
@@ -114,7 +114,7 @@ router.post('/:obj_id/remove', (req, res, next) => {
 // Endpoint to show shared objects of the group
 // Params body:
 // user_id
-router.post('/:group_id/sharedObjs', (req, res, next) => {
+router.get('/:group_id/sharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
   Object.find({ group_ids: group_id })
@@ -129,7 +129,7 @@ router.post('/:group_id/sharedObjs', (req, res, next) => {
 // Endpoint to show user's shared objects with the group
 // Params body:
 // user_id
-router.post('/:group_id/mySharedObjs', (req, res, next) => {
+router.get('/:group_id/mySharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
   Object.find({ group_ids: group_id } && { owner: req.user_id })
@@ -179,7 +179,7 @@ router.post('/group/:obj_id/shareObj', (req, res, next) => {
 // Endpoint to send share request
 // Params body:
 // user_id
-router.post('/:obj_id/share', (req, res, next) => {
+router.get('/:obj_id/share', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
   Object.findOne({ obj_id })
@@ -197,7 +197,7 @@ router.post('/:obj_id/share', (req, res, next) => {
 // Endpoint to accept share request
 // Params body:
 // user_id
-router.post('/:obj_id/share/accept', (req, res, next) => {
+router.get('/:obj_id/share/accept', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
   Object.findOne({ obj_id })
@@ -213,7 +213,7 @@ router.post('/:obj_id/share/accept', (req, res, next) => {
 // Endpoint to notify object return
 // Params body:
 // user_id
-router.post('/:obj_id/share/return', (req, res, next) => {
+router.get('/:obj_id/share/return', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
   Object.findOne({ obj_id })
