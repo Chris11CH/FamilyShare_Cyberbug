@@ -167,12 +167,13 @@ router.post('/:obj_id/remove', (req, res, next) => {
 router.post('/group/:obj_id/shareObj', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.findOne({ obj_id })
+  Object.findOne({ object_id: obj_id })
     .then(obj => {
-      if (!obj || obj.length === 0) {
+      if (!obj) {
         return res.status(404).send('Object not found')
       }
       obj.group_ids.push(req.body.group_id)
+      return res.status(200).send('Object Shared')
     }).catch(next)
 })
 
