@@ -11,7 +11,7 @@ const Image = require('../models/image')
 // object_name
 // object_description
 router.post('/:user_id', async (req, res, next) => {
-  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  if (!req.params.user_id) { return res.status(401).send('Unauthorized') }
   const {
     object_name, object_description
   } = req.body
@@ -55,13 +55,13 @@ router.post('/:user_id', async (req, res, next) => {
 // user_id
 router.post('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
-  const { id } = req.params.user_id
-  Object.find({ owner: id }).then(objects => {
-    if (!objects) {
-      return res.status(404).send('No objects for this user')
-    }
-    res.json(objects)
-  }).catch(next)
+  Object.find({ owner: req.params.user_id })
+    .then(objects => {
+      if (!objects || objects.length === 0) {
+        return res.status(404).send('No objects for this user')
+      }
+      res.json(objects)
+    }).catch(next)
 })
 
 // Wrapped DONE
