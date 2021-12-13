@@ -49,12 +49,27 @@ router.post('/:user_id', async (req, res, next) => {
 })
 
 // Wrapper DONE
+// Endpoint to get your objects
+// Params body:
+// user_id
+router.get('/:user_id/Objects', (req, res, next) => {
+  if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
+  Object.find({ owner: req.params.user_id })
+    .then(objects => {
+      if (!objects || objects.length === 0) {
+        return res.status(404).send('No objects for this user')
+      }
+      res.json(objects)
+    }).catch(next)
+})
+
+// Wrapper DONE
 // Endpoint to get your lent objects
 // Params body:
 // user_id
 router.get('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
-  Object.find({ owner: req.params.user_id })
+  Object.find({ owner: req.params.user_id } && { shared_with_user: !null })
     .then(objects => {
       if (!objects || objects.length === 0) {
         return res.status(404).send('No objects for this user')
