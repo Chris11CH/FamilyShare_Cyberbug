@@ -69,7 +69,7 @@ router.get('/:user_id/objects', (req, res, next) => {
 // user_id
 router.get('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
-  Object.find({ owner: req.params.user_id } && { shared_with_user: !null })
+  Object.find({ owner: req.params.user_id }, { shared_with_user: !null })
     .then(objects => {
       if (!objects || objects.length === 0) {
         return res.status(404).send('No objects for this user')
@@ -96,9 +96,8 @@ router.get('/:user_id/borrowedObjects', (req, res, next) => {
 // Endpoint to search an object
 // Params body:
 // user_id
-// group_id
-router.post('/:obj_id/search', (req, res, next) => {
-  if (!req.user_id || !req.group_id) { return res.status(401).send('Unauthorized') }
+router.get('/:obj_id/search', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
   Object.findOne({ object_id: obj_id })
     .populate('image')
@@ -146,10 +145,10 @@ router.get('/:group_id/sharedObjs', (req, res, next) => {
 router.get('/:group_id/mySharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
-  Object.find({ group_ids: group_id } && { owner: req.user_id })
+  Object.find({ group_ids: group_id }, { owner: req.user_id })
     .then(objects => {
-      if (!objects || objects.length === 0) {
-        return res.status(404).send('You have no shared objects with this group')
+      if (!objects) {
+        return res.status(404).send('Error')
       }
       res.json(objects)
     }).catch(next)
