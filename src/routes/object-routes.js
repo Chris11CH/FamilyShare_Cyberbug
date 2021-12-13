@@ -71,7 +71,7 @@ router.get('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
   Object.find({ owner: req.params.user_id }, { shared_with_user: !null })
     .then(objects => {
-      if (!objects || objects.length === 0) {
+      if (!objects) {
         return res.status(404).send('No objects for this user')
       }
       res.json(objects)
@@ -83,10 +83,9 @@ router.get('/:user_id/lentObjects', (req, res, next) => {
 // Params body:
 // user_id
 router.get('/:user_id/borrowedObjects', (req, res, next) => {
-  if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
-  const { id } = req.params.user_id
-  Object.find({ shared_with_user: id }).then(objects => {
-    if (!objects || objects.length === 0) {
+  if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
+  Object.find({ shared_with_user: req.user_id }).then(objects => {
+    if (!objects) {
       return res.status(404).send('No objects for this user')
     }
     res.json(objects)
