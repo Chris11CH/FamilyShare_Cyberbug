@@ -52,7 +52,7 @@ router.post('/:user_id', async (req, res, next) => {
 // Endpoint to get your objects
 // Params body:
 // user_id
-router.get('/:user_id/Objects', (req, res, next) => {
+router.get('/:user_id/objects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
   Object.find({ owner: req.params.user_id })
     .then(objects => {
