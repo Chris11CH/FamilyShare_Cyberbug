@@ -116,10 +116,11 @@ router.get('/:obj_id/search', (req, res, next) => {
 router.get('/:obj_id/remove', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.remove({ object_id: obj_id }).then(obj => {
-    if (!obj || obj.length === 0) {
+  Object.deleteOne({ object_id: obj_id }).then(obj => {
+    if (!obj) {
       return res.status(404).send('Object not found')
     }
+    return res.status(200).send('Object Removed')
   }).catch(next)
 })
 
