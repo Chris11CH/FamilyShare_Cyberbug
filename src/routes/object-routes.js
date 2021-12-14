@@ -162,15 +162,17 @@ router.get('/:group_id/mySharedObjs', (req, res, next) => {
 router.post('/:obj_id/remove', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
+  const group_id = req.body.group_id
   Object.findOne({ object_id: obj_id }).then(obj => {
     if (!obj) {
       return res.status(404).send('Object not found')
     }
-    const index = obj.group_ids.indexOf(req.body.group_id)
-    if (!index) {
+    if (!obj.group_ids.includes(group_id)) {
       return res.status(404).send('Object not shared in this group')
     }
-    obj.group_ids.pull(index, 1)
+    obj.group_ids.pull(group_id)
+    obj.save()
+    return res.status(200).send('Object removed from the group')
   }).catch(next)
 })
 
