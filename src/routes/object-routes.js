@@ -131,7 +131,7 @@ router.get('/:group_id/sharedObjs', (req, res, next) => {
   const group_id = req.params.group_id
   Object.find({ group_ids: group_id })
     .then(objects => {
-      if (!objects || objects.length === 0) {
+      if (!objects) {
         return res.status(404).send('No shared objects for this group')
       }
       res.json(objects)
@@ -144,7 +144,8 @@ router.get('/:group_id/sharedObjs', (req, res, next) => {
 router.get('/:group_id/mySharedObjs', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const group_id = req.params.group_id
-  Object.find({ group_ids: group_id }, { owner: req.user_id })
+  const user = req.user_id
+  Object.find({ group_ids: group_id, owner: user })
     .then(objects => {
       if (!objects) {
         return res.status(404).send('Error')
@@ -179,12 +180,11 @@ router.post('/:obj_id/remove', (req, res, next) => {
 router.post('/group/:obj_id/shareObj', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.findOne({ object_id: obj_id })
+  Object.findOneAndUpdate({ object_id: obj_id }, { $push: { group_ids: req.body.group_id } })
     .then(obj => {
       if (!obj) {
         return res.status(404).send('Object not found')
       }
-      obj.group_ids.push(req.body.group_id)
       return res.status(200).send('Object Shared')
     }).catch(next)
 })
@@ -213,12 +213,11 @@ router.get('/:obj_id/share', (req, res, next) => {
 router.get('/:obj_id/share/accept', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.findOne({ object_id: obj_id })
+  Object.findOneAndUpdate({ object_id: obj_id }, { shared_with_user: req.body.user_id })
     .then(obj => {
       if (!obj || obj.length === 0) {
         return res.status(404).send('Object not found')
       }
-      obj.shared_with_user = req.body.user_id
       res.json(obj)
     }).catch(next)
 })
@@ -229,7 +228,7 @@ router.get('/:obj_id/share/accept', (req, res, next) => {
 router.get('/:obj_id/share/return', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.findOne({ object_id: obj_id })
+  Object.findOne({ object_id: obj_id }, { shared_with_user: null })
     .then(obj => {
       if (!obj || obj.length === 0) {
         return res.status(404).send('Object not found')
@@ -237,7 +236,6 @@ router.get('/:obj_id/share/return', (req, res, next) => {
       if (!obj.shared_with_user) {
         return res.status(404).send('Object is not shared')
       }
-      obj.shared_with_user = null
       res.json(obj)
     }).catch(next)
 })
