@@ -180,11 +180,17 @@ router.post('/:obj_id/remove', (req, res, next) => {
 router.post('/group/:obj_id/shareObj', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const obj_id = req.params.obj_id
-  Object.findOneAndUpdate({ object_id: obj_id }, { $push: { group_ids: req.body.group_id } })
+  const group_id = req.body.group_id
+  Object.findOne({ object_id: obj_id })
     .then(obj => {
       if (!obj) {
         return res.status(404).send('Object not found')
       }
+      if (obj.group_ids.includes(group_id)) {
+        return res.status(502).send('Object already shared with this group')
+      }
+      obj.group_ids.push(group_id)
+      obj.save()
       return res.status(200).send('Object Shared')
     }).catch(next)
 })
@@ -200,7 +206,7 @@ router.get('/:obj_id/share', (req, res, next) => {
       if (!obj || obj.length === 0) {
         return res.status(404).send('Object not found')
       }
-      if (obj.shared_with_user) {
+      if (obj.shared_with_user !== null) {
         return res.status(404).send('Object not available')
       }
       res.json(obj)
