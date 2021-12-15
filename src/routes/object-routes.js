@@ -69,7 +69,7 @@ router.get('/:user_id/objects', (req, res, next) => {
 // user_id
 router.get('/:user_id/lentObjects', (req, res, next) => {
   if (req.user_id !== req.params.user_id) { return res.status(401).send('Unauthorized') }
-  Object.find({ owner: req.params.user_id }, { shared_with_user: !null })
+  Object.find({ owner: req.params.user_id, shared_with_user: !null })
     .then(objects => {
       if (!objects) {
         return res.status(404).send('No objects for this user')
