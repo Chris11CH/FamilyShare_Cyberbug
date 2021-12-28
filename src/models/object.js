@@ -32,6 +32,11 @@ const objectSchema = new mongoose.Schema(
       type: String,
       default: null,
       required: false
+    },
+    req_to_share: {
+      type: String,
+      default: null,
+      required: false
     }
   },
   { timestamps: true, toJSON: { virtuals: true } }
