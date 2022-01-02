@@ -232,7 +232,6 @@ router.get('/:obj_id/share/accept', (req, res, next) => {
       obj.shared_with_user = obj.req_to_share
       obj.req_to_share = null
       obj.save()
-      console.log(obj)
       res.json(obj)
     }).catch(next)
 })
@@ -247,7 +246,6 @@ router.get('/:user_id/getInShareRequests', (req, res, next) => {
       if (!obj) {
         return res.status(404).send('Object not found')
       }
-      console.log(obj)
       res.json(obj)
     }).catch(next)
 })
