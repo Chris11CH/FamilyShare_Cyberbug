@@ -197,6 +197,24 @@ router.post('/group/:obj_id/shareObj', (req, res, next) => {
       return res.status(200).send('Object Shared')
     }).catch(next)
 })
+// Endpoint to remove an object from the group
+// Params body:
+// user_id
+// group_id
+router.post('/group/:obj_id/shareObj/remove', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  const group_id = req.body.group_id
+  Object.findOne({ object_id: obj_id })
+    .then(obj => {
+      if (!obj) {
+        return res.status(404).send('Object not found')
+      }
+      obj.group_ids.pop(group_id)
+      obj.save()
+      return res.status(200).send('Object Shared')
+    }).catch(next)
+})
 
 // Endpoint to send share request
 // Params body:
