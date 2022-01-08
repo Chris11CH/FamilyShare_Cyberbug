@@ -254,6 +254,23 @@ router.get('/:obj_id/share/accept', (req, res, next) => {
     }).catch(next)
 })
 
+// Endpoint to ignore share request
+// Params body:
+// user_id
+router.get('/:obj_id/share/ignore', (req, res, next) => {
+  if (!req.user_id) { return res.status(401).send('Unauthorized') }
+  const obj_id = req.params.obj_id
+  Object.findOne({ object_id: obj_id })
+    .then(obj => {
+      if (!obj || obj.length === 0) {
+        return res.status(404).send('Object not found')
+      }
+      obj.req_to_share = null
+      obj.save()
+      res.json(obj)
+    }).catch(next)
+})
+
 // Endpoint to get incoming share requests
 // Params body:
 // user_id
